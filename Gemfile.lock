@@ -59,6 +59,7 @@ GEM
     do_sqlite3 (0.10.14)
       data_objects (= 0.10.14)
     dotenv (1.0.2)
+    dovecot_crammd5 (0.0.3)
     fastercsv (1.5.5)
     json (1.8.1)
     json_pure (1.8.1)
@@ -76,5 +77,6 @@ DEPENDENCIES
   dm-mysql-adapter
   dm-sqlite-adapter
   dotenv
+  dovecot_crammd5
   oj
   thor

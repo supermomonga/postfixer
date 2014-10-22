@@ -55,7 +55,7 @@ class App < Thor
     # Create domain if not exists
     unless Domain.first(domain: domain) || Domain.create({
         domain: domain,
-        description: "#{options[:email]}",
+        description: domain,
         created: DateTime.now,
         modified: DateTime.now
       }).save
@@ -73,6 +73,9 @@ class App < Thor
 
     mailbox_domain_dir = base_dir + domain
     mailbox_account_dir = base_dir + domain + account
+    mailbox_sub_dirs = %w`cur new tmp`.map{|dir|
+      mailbox_account_dir + dir
+    }
 
     unless File.exists? mailbox_domain_dir
       puts "Create #{mailbox_domain_dir}"
@@ -82,9 +85,6 @@ class App < Thor
     unless File.exists? mailbox_account_dir
       puts "Create #{mailbox_account_dir}"
       Dir.mkdir mailbox_account_dir, 0700
-      mailbox_sub_dirs = %w`cur new tmp`.map{|dir|
-        mailbox_account_dir + dir
-      }
       mailbox_sub_dirs.each do |mailbox_sub_dir|
         unless File.exists? mailbox_sub_dir
           puts "Create #{mailbox_sub_dir}"
@@ -96,9 +96,9 @@ class App < Thor
     # Create mailbox
     mailbox = Mailbox.create({
       username: options[:email],
-      password: options[:password],
+      password: DovecotCrammd5.calc(options[:password]),
       name: options[:email],
-      maildir: File.expand_path(mailbox_account_dir),
+      maildir: "{CRAM-MD5}" + File.expand_path(mailbox_account_dir),
       local_part: account,
       domain: domain,
       created: DateTime.now,
