@@ -47,7 +47,7 @@ class App < Thor
     end
 
     # Existence check
-    if Mailbox.first(username: options[:email]) && Alias.first(addres: options[:email])
+    if Mailbox.first(username: options[:email]) && Alias.first(address: options[:email])
       puts "Already exists."
       exit 1
     end
@@ -94,7 +94,10 @@ class App < Thor
     end
 
     # Create mailbox
-    mailbox = Mailbox.create({
+    mailbox = Mailbox.first_or_create({
+      username: options[:email],
+    },
+    {
       username: options[:email],
       password: DovecotCrammd5.calc(options[:password]),
       name: options[:email],
@@ -106,7 +109,10 @@ class App < Thor
     })
 
     # Create alias
-    mail_alias = Alias.create({
+    mail_alias = Alias.first_or_create({
+      address: options[:email],
+    },
+    {
       address: options[:email],
       goto: options[:email],
       domain: domain,
