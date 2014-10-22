@@ -26,9 +26,8 @@ class App < Thor
       end
     when :json
       json = Oj.dump mailboxes.map{|mailbox|
-        %i`username name maildir local_part domain created modified`.inject({}){|acc, row|
+        %i`username name maildir local_part domain created modified`.each_with_object({}){|row, acc|
           acc[row] = mailbox.send row
-          acc
         }
       }
       puts json
