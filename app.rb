@@ -4,6 +4,7 @@ require 'bundler'
 Bundler.require
 Dotenv.load
 require 'pathname'
+require 'oj'
 
 class App < Thor
 
@@ -13,11 +14,24 @@ class App < Thor
   end
 
   desc 'list', 'List all mail account'
+  method_option :format, aliases: :f, required: true, default: :human, enum: %w`human json`, desc: 'Format to output'
   def list
-    count = Mailbox.count
-    puts "Found #{count} mailboxes."
-    Mailbox.all.map do |mailbox|
-      puts "#{mailbox.username}\t(#{mailbox.created} created.)"
+    mailboxes = Mailbox.all
+
+    case options[:format].to_sym
+    when :human
+      puts "Found #{mailboxes.size} mailboxes."
+      mailboxes.each do |mailbox|
+        puts "#{mailbox.username}\t\t(created at #{mailbox.created.strftime '%F %T'})"
+      end
+    when :json
+      json = Oj.dump mailboxes.map{|mailbox|
+        %i`username name maildir local_part domain created modified`.inject({}){|acc, row|
+          acc[row] = mailbox.send row
+          acc
+        }
+      }
+      puts json
     end
   end
 
