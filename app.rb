@@ -105,7 +105,16 @@ class App < Thor
       modified: DateTime.now
     })
 
-    if mailbox.save && mailbox_sub_dirs.all?{|dir| File.exists? dir }
+    # Create alias
+    mail_alias = Alias.create({
+      address: options[:email],
+      goto: options[:email],
+      domain: domain,
+      created: DateTime.now,
+      modified: DateTime.now
+    })
+
+    if mailbox.save && mail_alias.save && mailbox_sub_dirs.all?{|dir| File.exists? dir }
       puts "Mailbox successfully created."
     else
       puts "Failed to create a mailbox."
