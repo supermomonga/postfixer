@@ -99,9 +99,9 @@ class App < Thor
     },
     {
       username: options[:email],
-      password: DovecotCrammd5.calc(options[:password]),
+      password: "{CRAM-MD5}" + DovecotCrammd5.calc(options[:password]),
       name: options[:email],
-      maildir: "{CRAM-MD5}" + File.expand_path(mailbox_account_dir),
+      maildir: File.expand_path(mailbox_account_dir),
       local_part: account,
       domain: domain,
       created: DateTime.now,
