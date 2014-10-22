@@ -17,7 +17,7 @@ class Domain
   property :quota       , Integer  , required: true , default: 0
   property :transport   , String   , required: true , default: 'virtual'
   property :backupmx    , Integer  , required: true , default: 0
-  property :updated     , DateTime , required: true
+  property :created     , DateTime , required: true
   property :modified    , DateTime , required: true
   property :active      , Integer  , required: true , default: 1
 end
@@ -32,7 +32,7 @@ class Mailbox
   property :quota      , Integer  , required: true , default: 0
   property :local_part , String   , required: true
   property :domain     , String   , required: true
-  property :updated    , DateTime , required: true
+  property :created    , DateTime , required: true
   property :modified   , DateTime , required: true
   property :active     , Integer  , required: true , default: 1
 end
@@ -43,7 +43,7 @@ class Alias
   property :address  , String   , key: true
   property :goto     , String   , required: true
   property :domain   , String   , required: true
-  property :updated  , DateTime , required: true
+  property :created  , DateTime , required: true
   property :modified , DateTime , required: true
   property :active   , Integer  , required: true , default: 1
 end
