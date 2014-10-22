@@ -5,13 +5,25 @@ Command line tool to manage postfix mail account. :mailbox_with_mail:
 
 ## Features
 
+`ruby ./app.rb help`
+`ruby ./app.rb help list`
+`ruby ./app.rb help add`
+
+
+## Note that:
+
 - Only supports MySQL for now.
 
 
 ## TODO
 
+- implement delete command
+- implement passwd command
+- support PostgreSQL
+- make it a RubyGem
 
-## License
+
+## This software is under MIT License
 
 Copyright (C) 2014 supermomonga
 
