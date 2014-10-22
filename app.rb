@@ -13,6 +13,8 @@ class App < Thor
 
   desc 'list', 'List all mail account'
   def list
+    count = Mailbox.count
+    puts "Found #{count} mailboxes."
     Mailbox.all.map do |mailbox|
       puts mailbox.username
     end
