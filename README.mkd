@@ -6,7 +6,9 @@ Command line tool to manage postfix mail account. :mailbox_with_mail:
 ## Features
 
 `ruby ./app.rb help`
+
 `ruby ./app.rb help list`
+
 `ruby ./app.rb help add`
 
 
