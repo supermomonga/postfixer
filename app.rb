@@ -47,7 +47,7 @@ class App < Thor
     end
 
     # Existence check
-    if Mailbox.first(username: options[:email])
+    if Mailbox.first(username: options[:email]) && Alias.first(addres: options[:email])
       puts "Already exists."
       exit 1
     end
