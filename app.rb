@@ -2,7 +2,7 @@
 
 require 'bundler'
 Bundler.require
-
+Dotenv.load
 
 class App < Thor
 
@@ -13,6 +13,7 @@ class App < Thor
 
   desc 'list', 'List all mail account'
   def list
+    puts ENV['HI']
     count = Mailbox.count
     puts "Found #{count} mailboxes."
     Mailbox.all.map do |mailbox|
