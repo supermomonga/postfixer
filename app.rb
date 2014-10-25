@@ -8,14 +8,14 @@ require 'oj'
 
 class App < Thor
 
-  def initialize(*args)
+  def initialize(*args) # {{{
     super
     connect_database
-  end
+  end # }}}
 
   desc 'list', 'List all mail account'
   method_option :format, aliases: :f, required: true, default: :human, enum: %w`human json`, desc: 'Format to output'
-  def list
+  def list # {{{
     mailboxes = Mailbox.all
 
     case options[:format].to_sym
@@ -32,12 +32,12 @@ class App < Thor
       }
       puts json
     end
-  end
+  end # }}}
 
   desc 'add', 'Add new email account'
-  method_option :email, aliases: :e, required: true, desc: 'e-mail address you want yo create.'
+  method_option :email, aliases: :e, required: true, desc: 'e-mail address you want to create.'
   method_option :password, aliases: :p, required: true, desc: 'Password to access IMAP/SMTP server.'
-  def add
+  def add # {{{
     account, domain = options[:email].match(/(.+)@(.+)/){|m|[m[1],m[2]]}
 
     # Validation
@@ -99,7 +99,7 @@ class App < Thor
     },
     {
       username: options[:email],
-      password: "{CRAM-MD5}" + DovecotCrammd5.calc(options[:password]),
+      password: cram_md5(options[:password]),
       name: options[:email],
       maildir: File.expand_path(mailbox_account_dir).sub(%r`^#{File.expand_path(base_dir)}/`, '') + '/',
       local_part: account,
@@ -126,14 +126,99 @@ class App < Thor
       puts "Failed to create a mailbox."
       exit 1
     end
+  end # }}}
 
-  end
+  desc 'passwd', 'Change mailbox password'
+  method_option :email, aliases: :e, required: true, desc: 'e-mail address you want to change password.'
+  method_option :password, aliases: :p, required: true, desc: 'New password'
+  def passwd # {{{
+    mailbox = Mailbox.first(username: options[:email])
+
+    unless mailbox
+      puts "Mailbox doesn't exists"
+      exit 1
+    end
+
+    if mailbox.update(password: cram_md5(options[:password]))
+      puts "Password changed."
+    else
+      puts "Failed to change password"
+      exit 1
+    end
+  end # }}}
+
+  desc 'delete', 'Delete mailbox'
+  method_option :email, aliases: :e, required: true, desc: 'e-mail address you want yo delete.'
+  def delete # {{{
+    account, domain = options[:email].match(/(.+)@(.+)/){|m|[m[1],m[2]]}
+    mailbox = Mailbox.first(username: options[:email])
+    mail_alias = Alias.first(address: options[:email])
+
+    unless mailbox
+      puts "Mailbox doesn't exists"
+      exit 1
+    end
+
+    if mailbox.destroy
+      puts "Mailbox destroyed"
+    else
+      puts "Failed to destroy mailbox."
+      exit 1
+    end
+
+    unless mail_alias
+      puts "Mailbox alias doesn't exists"
+      exit 1
+    end
+
+    if mail_alias.destroy
+      puts "Mailbox alias destroyed"
+    else
+      puts "Failed to destroy mailbox alias."
+      exit 1
+    end
+
+    base_dir = Pathname.new(ENV['MAILBOX_BASEDIR'] || './mailboxes')
+    mailbox_domain_dir = base_dir + domain
+    mailbox_account_dir = base_dir + domain + account
+
+    archive_dir = Pathname.new(ENV['MAILBOX_ARCHIVEDIR'] || './mailbox_archives')
+    archive_domain_dir = archive_dir + domain
+    archive_account_dir = archive_dir + domain + "#{account}_#{DateTime.now.strftime("%Y-%m-%d-%H-%M-%S")}"
+
+    unless File.exists? mailbox_account_dir
+      puts %`"#{mailbox_account_dir}" not exists.`
+      exit 1
+    end
+
+    unless File.exists? archive_dir
+      puts "Create #{archive_dir}"
+      Dir.mkdir archive_dir, 0700
+    end
+
+    unless File.exists? archive_domain_dir
+      puts "Create #{archive_domain_dir}"
+      Dir.mkdir archive_domain_dir, 0700
+    end
+
+    if FileUtils.move mailbox_account_dir, archive_account_dir
+      puts "Move #{mailbox_account_dir} to #{archive_account_dir}"
+    else
+      puts "Failed to move #{mailbox_account_dir} to #{archive_account_dir}"
+      exit 1
+    end
+
+  end # }}}
 
   private
-  def connect_database
+  def connect_database # {{{
     require './models'
     DataMapper.finalize.auto_upgrade!
-  end
+  end # }}}
+
+  def cram_md5 password # {{{
+    "{CRAM-MD5}" + DovecotCrammd5.calc(password)
+  end # }}}
 
 end
 
